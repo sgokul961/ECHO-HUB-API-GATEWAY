@@ -1,2 +1,3 @@
 # Environment file
-*.env
+
+/pkg/config/envs/dev.env
