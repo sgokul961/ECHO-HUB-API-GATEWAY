@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package api.pb.auth;
+
+option go_package = "./pkg/api/pb";
+
+// Service definition for authentication
+service AuthService {
+    rpc Register(RegisterRequest) returns (RegisterResponse) {}
+    rpc Login(LoginRequest) returns (LoginResponse) {}
+    rpc Validate(ValidateRequest) returns (ValidateResponse) {}
+    rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse) {}
+    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse) {}
+    rpc AdminLogin(AdminLoginRequest) returns (AdminLoginResponse) {}
+    rpc AdminSignup(AdminSignupRequest) returns (AdminSignupResponse) {}
+
+
+}
+
+// Register Request and Response messages
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string username = 3;         // Additional field for username
+    string phonenum = 4;         // Additional field for phone number
+    string profile_picture = 5;  // Additional field for profile picture URL
+    string bio = 6;              // Additional field for user biography
+    string gender=7;  //feild for adding gender
+  
+}
+
+message RegisterResponse {
+    int64 status = 1;
+    string error = 2;
+}
+
+// Login Request and Response messages
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string AccessToken = 1;
+    string RefreshToken = 2;
+}
+
+// Validate Request and Response messages
+message ValidateRequest {
+    string token = 1;
+}
+
+message ValidateResponse {
+    int64 status = 1;
+    string error = 2;
+    int64 userId = 3;
+}
+
+// Verify Email Request and Response messages
+message VerifyEmailRequest {
+    string email = 1;
+    string verificationToken = 2;
+}
+
+message VerifyEmailResponse {
+    int64 status = 1;
+    string error = 2;
+}
+
+// Reset Password Request and Response messages
+message ResetPasswordRequest {
+    string email = 1;
+}
+
+message ResetPasswordResponse {
+    int64 status = 1;
+    string error = 2;
+}
+
+//AdminLoginRequest and AdminLoginResponse
+message AdminLoginRequest{
+    string email=1;
+    string password=2;
+}
+message AdminLoginResponse {
+    string AccessToken = 1;
+    string RefreshToken = 2;
+}
+
+//admin signup request and response
+message AdminSignupRequest{
+    string email = 1;
+    string password = 2;
+    string username = 3;         // Additional field for username
+    string phonenum = 4;         // Additional field for phone number
+    string profile_picture = 5;;  // Additional field for profile picture URL
+    string bio = 6;              // Additional field for user biography
+    string gender=7;  //feild for adding gender  
+}
+
+message AdminSignupResponse {
+    int64 id = 1;
+    
+}
