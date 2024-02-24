@@ -11,17 +11,26 @@ func RegisterRoutes(r *gin.Engine, c *config.Config) *ServiceClient {
 	svc := &ServiceClient{
 		Client: InitServiceClient(c),
 	}
+	authMiddleware := InitAuthMiddleWare(svc)
+	adminAuthMiddleware := authMiddleware.AdminAuthRequired // Take the address here
+	userAuthMiddleware := authMiddleware.UserAuthRequired
 
 	//roots accessible for user
 
 	authRoutes := r.Group("/auth")
 
+	//middleware for user
+	authRoutes.Use(userAuthMiddleware)
 	authRoutes.POST("/register", svc.Register)
 	authRoutes.POST("/login", svc.Login)
 
 	//roots accesible for admin
 
 	adminRoutes := r.Group("/admin")
+
+	//middleware for admin
+
+	adminRoutes.Use(adminAuthMiddleware)
 
 	adminRoutes.POST("/adminsignup", svc.AdminSignup)
 	adminRoutes.POST("adminlogin", svc.AdminLogin)

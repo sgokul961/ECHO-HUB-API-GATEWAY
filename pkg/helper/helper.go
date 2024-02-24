@@ -2,11 +2,9 @@ package helper
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
@@ -16,44 +14,38 @@ import (
 	"github.com/spf13/viper"
 )
 
-type JwtWrapper struct {
-	SecretKey       string
-	ExpirationHours int64
-}
 type jwtClaims struct {
 	jwt.StandardClaims
-	Id       int64
-	Email    string
-	Password string
-	Username string
+	Id   int64
+	Role string
 }
 
-func (w *JwtWrapper) ValidateToken(signedToken string) (claims *jwtClaims, err error) {
-	token, err := jwt.ParseWithClaims(
-		signedToken,
-		&jwtClaims{},
-		func(token *jwt.Token) (interface{}, error) {
-			return []byte(w.SecretKey), nil
-		},
-	)
+// func ValidateToken(signedToken string) (claims *jwtClaims, err error) {
+// 	token, err := jwt.ParseWithClaims(
+// 		signedToken,
+// 		&jwtClaims{},
+// 		func(token *jwt.Token) (interface{}, error) {
+// 			return []byte(w.SecretKey), nil
+// 		},
+// 	)
 
-	if err != nil {
-		return
-	}
+// 	if err != nil {
+// 		return
+// 	}
 
-	claims, ok := token.Claims.(*jwtClaims)
+// 	claims, ok := token.Claims.(*jwtClaims)
 
-	if !ok {
-		return nil, errors.New("couldn't parse claims")
-	}
+// 	if !ok {
+// 		return nil, errors.New("couldn't parse claims")
+// 	}
 
-	if claims.ExpiresAt < time.Now().Local().Unix() {
-		return nil, errors.New("JWT is expired")
-	}
+// 	if claims.ExpiresAt < time.Now().Local().Unix() {
+// 		return nil, errors.New("JWT is expired")
+// 	}
 
-	return claims, nil
+// 	return claims, nil
 
-}
+// }
 
 func AddImageToS3(file *multipart.FileHeader) (string, error) {
 
@@ -93,4 +85,16 @@ func AddImageToS3(file *multipart.FileHeader) (string, error) {
 	}
 
 	return result.Location, nil
+}
+func ValidateToken(tokenstring string, key string) (*jwt.Token, error) {
+
+	token, err := jwt.ParseWithClaims(tokenstring, jwtClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signin method:%v", t.Header["alg"])
+		}
+		return []byte(key), nil
+
+	})
+	return token, err
+
 }
