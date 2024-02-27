@@ -6,12 +6,12 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/config"
 )
 
-func RegisterRoutes(r *gin.Engine, c *config.Config) *ServiceClient {
+func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
 
 	svc := &ServiceClient{
-		Client: InitServiceClient(c),
+		Client: InitServiceClient(&c),
 	}
-	authMiddleware := InitAuthMiddleWare(svc)
+	authMiddleware := InitAuthMiddleWare(svc, c)
 	adminAuthMiddleware := authMiddleware.AdminAuthRequired // Take the address here
 	userAuthMiddleware := authMiddleware.UserAuthRequired
 
@@ -19,21 +19,23 @@ func RegisterRoutes(r *gin.Engine, c *config.Config) *ServiceClient {
 
 	authRoutes := r.Group("/auth")
 
-	//middleware for user
-	authRoutes.Use(userAuthMiddleware)
 	authRoutes.POST("/register", svc.Register)
 	authRoutes.POST("/login", svc.Login)
+	//middleware for user
+
+	authRoutes.Use(userAuthMiddleware)
+
+	authRoutes.PATCH("/resetPassword", userAuthMiddleware, svc.ResetPassword)
 
 	//roots accesible for admin
 
 	adminRoutes := r.Group("/admin")
 
+	adminRoutes.POST("/adminsignup", svc.AdminSignup)
+	adminRoutes.POST("adminlogin", svc.AdminLogin)
 	//middleware for admin
 
 	adminRoutes.Use(adminAuthMiddleware)
-
-	adminRoutes.POST("/adminsignup", svc.AdminSignup)
-	adminRoutes.POST("adminlogin", svc.AdminLogin)
 
 	return svc
 
@@ -49,4 +51,7 @@ func (svc *ServiceClient) AdminLogin(ctx *gin.Context) {
 }
 func (svc *ServiceClient) AdminSignup(ctx *gin.Context) {
 	routes.AdminSignup(ctx, svc.Client)
+}
+func (svc *ServiceClient) ResetPassword(ctx *gin.Context) {
+	routes.ResetPassword(ctx, svc.Client)
 }

@@ -20,33 +20,6 @@ type jwtClaims struct {
 	Role string
 }
 
-// func ValidateToken(signedToken string) (claims *jwtClaims, err error) {
-// 	token, err := jwt.ParseWithClaims(
-// 		signedToken,
-// 		&jwtClaims{},
-// 		func(token *jwt.Token) (interface{}, error) {
-// 			return []byte(w.SecretKey), nil
-// 		},
-// 	)
-
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	claims, ok := token.Claims.(*jwtClaims)
-
-// 	if !ok {
-// 		return nil, errors.New("couldn't parse claims")
-// 	}
-
-// 	if claims.ExpiresAt < time.Now().Local().Unix() {
-// 		return nil, errors.New("JWT is expired")
-// 	}
-
-// 	return claims, nil
-
-// }
-
 func AddImageToS3(file *multipart.FileHeader) (string, error) {
 
 	//got an error while uploading the profile picture so loaded the env varibles directly with using viper

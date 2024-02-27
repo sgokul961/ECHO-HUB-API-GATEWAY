@@ -15,7 +15,7 @@ func NewServer(cfg *config.Config) *Server {
 	r := gin.Default()
 
 	// Register routes for authentication service
-	auth.RegisterRoutes(r, cfg)
+	auth.RegisterRoutes(r, *cfg)
 
 	return &Server{
 		router: r,

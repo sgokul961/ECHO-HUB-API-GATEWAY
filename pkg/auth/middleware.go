@@ -18,10 +18,11 @@ type jwtClaims struct {
 }
 type AuthMiddleWareConfig struct {
 	svc *ServiceClient
+	con config.Config
 }
 
-func InitAuthMiddleWare(svc *ServiceClient) *AuthMiddleWareConfig {
-	return &AuthMiddleWareConfig{svc: svc}
+func InitAuthMiddleWare(svc *ServiceClient, con config.Config) *AuthMiddleWareConfig {
+	return &AuthMiddleWareConfig{svc: svc, con: con}
 }
 
 func (c *AuthMiddleWareConfig) AdminAuthRequired(ctx *gin.Context) {
@@ -34,8 +35,12 @@ func (c *AuthMiddleWareConfig) AdminAuthRequired(ctx *gin.Context) {
 	}
 
 	token := strings.Split(authorization, "Bearer ")
+	if len(token) != 2 {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
-	validastring, err := validateToken(token[1])
+	validastring, err := c.validateToken(token[1])
 
 	if err != nil || !validastring.Valid {
 		errRes := response.MakeResponse(http.StatusUnauthorized, "not authorised for this action", nil, err)
@@ -68,15 +73,27 @@ func (c *AuthMiddleWareConfig) AdminAuthRequired(ctx *gin.Context) {
 
 }
 
-func validateToken(tokenString string) (*jwt.Token, error) {
-	var con config.Config
-	token, err := jwt.ParseWithClaims(tokenString, jwtClaims{}, func(t *jwt.Token) (interface{}, error) {
+func (c *AuthMiddleWareConfig) validateToken(tokenString string) (*jwt.Token, error) {
+	//var con config.Config
+	token, err := jwt.ParseWithClaims(tokenString, &jwtClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
-
-		return []byte(con.JWTSecretKey), nil
+		fmt.Println("jwt key", c.con.JWTSecretKey)
+		return []byte(c.con.JWTSecretKey), nil
 	})
+	if err != nil {
+		// There was an error during token validation
+		fmt.Println("Error validating token:", err)
+	}
+
+	if claims, ok := token.Claims.(*jwtClaims); ok && token.Valid {
+		fmt.Printf("Token ID: %d\n", claims.Id)
+		fmt.Printf("Token Role: %s\n", claims.Role)
+		// Add more logging or inspection of claims as needed
+	} else {
+		fmt.Println("Invalid token claims")
+	}
 
 	return token, err
 }
@@ -87,8 +104,14 @@ func (c *AuthMiddleWareConfig) UserAuthRequired(ctx *gin.Context) {
 		return
 	}
 	token := strings.Split(authorization, "Bearer ")
+	fmt.Println("token", token)
+	if len(token) != 2 {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
-	validastring, err := validateToken(token[1])
+	validastring, err := c.validateToken(token[1])
+	fmt.Println("validtokenor not", validastring)
 
 	if err != nil || !validastring.Valid {
 		errRes := response.MakeResponse(http.StatusUnauthorized, "not authorised for this action", nil, err)
@@ -98,12 +121,15 @@ func (c *AuthMiddleWareConfig) UserAuthRequired(ctx *gin.Context) {
 	}
 	claims, ok := validastring.Claims.(*jwtClaims)
 
+	fmt.Println("calims role", claims.Role)
+
 	if !ok || claims == nil {
-		errRes := response.MakeResponse(http.StatusUnauthorized, "not authorised for this action", nil, fmt.Errorf("unable to retrieve claims"))
+		errRes := response.MakeResponse(http.StatusUnauthorized, "claims nil ,not authorised for this action", nil, fmt.Errorf("unable to retrieve claims"))
 		ctx.JSON(http.StatusUnauthorized, errRes)
 		ctx.Abort()
 		return
 	}
+
 	userId := claims.Id
 	role := claims.Role
 
@@ -114,3 +140,23 @@ func (c *AuthMiddleWareConfig) UserAuthRequired(ctx *gin.Context) {
 	ctx.Next()
 
 }
+
+// func (c *AuthMiddleWareConfig) validateToken(tokenString string) (*jwtClaims, error) {
+// 	token, err := jwt.ParseWithClaims(tokenString, &jwtClaims{}, func(t *jwt.Token) (interface{}, error) {
+// 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+// 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+// 		}
+// 		return []byte(c.con.JWTSecretKey), nil
+// 	})
+// 	if err != nil {
+// 		return nil, fmt.Errorf("error parsing token: %v", err)
+// 	}
+
+// 	// Check if token is valid and retrieve claims
+// 	if claims, ok := token.Claims.(*jwtClaims); ok && token.Valid {
+// 		return claims, nil
+// 	}
+
+// 	// Invalid token or claims
+// 	return nil, fmt.Errorf("invalid token or claims")
+// }

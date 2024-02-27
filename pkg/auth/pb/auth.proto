@@ -70,6 +70,8 @@ message VerifyEmailResponse {
 // Reset Password Request and Response messages
 message ResetPasswordRequest {
     string email = 1;
+    string password = 2;
+    int64 id=3;
 }
 
 message ResetPasswordResponse {
