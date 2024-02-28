@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/auth/routes"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/config"
+	"github.com/sgokul961/echo-hub-api-gateway/pkg/middleware"
 )
 
 func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
@@ -11,7 +12,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
 	svc := &ServiceClient{
 		Client: InitServiceClient(&c),
 	}
-	authMiddleware := InitAuthMiddleWare(svc, c)
+	authMiddleware := middleware.InitAuthMiddleWare(c)
 	adminAuthMiddleware := authMiddleware.AdminAuthRequired // Take the address here
 	userAuthMiddleware := authMiddleware.UserAuthRequired
 
@@ -54,4 +55,7 @@ func (svc *ServiceClient) AdminSignup(ctx *gin.Context) {
 }
 func (svc *ServiceClient) ResetPassword(ctx *gin.Context) {
 	routes.ResetPassword(ctx, svc.Client)
+}
+func (svc *ServiceClient) ForgotPassWord(ctx *gin.Context) {
+	routes.ForgotPassWord(ctx, svc.Client)
 }
