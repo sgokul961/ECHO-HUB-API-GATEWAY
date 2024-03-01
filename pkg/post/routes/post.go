@@ -13,7 +13,7 @@ import (
 func FollowUser(ctx *gin.Context, p pb.PostServiceClient) {
 	userid, ok := ctx.Get("userId")
 	if !ok || userid == nil {
-		ctx.JSON(400, gin.H{"error": "userId not found in context or is nil"})
+		ctx.JSON(401, gin.H{"error": "userId not found in context or is nil"})
 		return
 	}
 	followId := ctx.Param("follow_id")
@@ -35,6 +35,32 @@ func FollowUser(ctx *gin.Context, p pb.PostServiceClient) {
 		return
 	}
 	successRes := models.MakeResponse(http.StatusOK, "successfully followed user", response, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}
+func UnfollowUser(ctx *gin.Context, p pb.PostServiceClient) {
+
+	following_user_id, ok := ctx.Get("userId")
+	if !ok || following_user_id == nil {
+		ctx.JSON(401, gin.H{"error": "following userId not found in context or is nil"})
+		return
+	}
+	followId := ctx.Param("unfollow_id")
+
+	followerIDInt, err := strconv.ParseInt(followId, 10, 64)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid followId format"})
+		return
+	}
+	res, err := p.UnfollowUser(ctx, &pb.UnfollowUserRequest{
+		FollowUserId:   following_user_id.(int64),
+		FollowerUserId: followerIDInt,
+	})
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "successfully unfollowed user", res, nil)
 	ctx.JSON(http.StatusOK, successRes)
 
 }

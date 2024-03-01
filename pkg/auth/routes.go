@@ -22,10 +22,10 @@ func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
 
 	authRoutes.POST("/register", svc.Register)
 	authRoutes.POST("/login", svc.Login)
+
 	//middleware for user
 
 	authRoutes.Use(userAuthMiddleware)
-
 	authRoutes.PATCH("/resetPassword", userAuthMiddleware, svc.ResetPassword)
 
 	//roots accesible for admin
@@ -34,6 +34,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
 
 	adminRoutes.POST("/adminsignup", svc.AdminSignup)
 	adminRoutes.POST("adminlogin", svc.AdminLogin)
+
 	//middleware for admin
 
 	adminRoutes.Use(adminAuthMiddleware)

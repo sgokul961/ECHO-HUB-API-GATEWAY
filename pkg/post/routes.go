@@ -19,9 +19,13 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	postrouts := r.Group("/post")
 	//r.Use(userAuthMiddleware)
 	postrouts.POST("/follow/:follow_id", userAuthMiddleware, svc.FollowUser)
+	postrouts.PATCH("/unfollow/:unfollow_id", userAuthMiddleware, svc.UnfollowUser)
 
 }
 
 func (svc *ServiceClient) FollowUser(ctx *gin.Context) {
 	routes.FollowUser(ctx, svc.Client)
+}
+func (svc *ServiceClient) UnfollowUser(ctx *gin.Context) {
+	routes.UnfollowUser(ctx, svc.Client)
 }

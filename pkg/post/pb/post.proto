@@ -33,7 +33,7 @@ message UnfollowUserRequest {
 }
 
 message UnfollowUserResponse {
-    bool success = 1;
+    int64 follower_user_id = 1;
 }
 // Upload post request and response messages
 message UploadPostRequest {
