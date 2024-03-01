@@ -37,6 +37,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
 	//middleware for admin
 
 	adminRoutes.Use(adminAuthMiddleware)
+	authRoutes.GET("/checkBlock", adminAuthMiddleware, svc.CheckUserBlocked)
 
 	return svc
 
@@ -58,4 +59,7 @@ func (svc *ServiceClient) ResetPassword(ctx *gin.Context) {
 }
 func (svc *ServiceClient) ForgotPassWord(ctx *gin.Context) {
 	routes.ForgotPassWord(ctx, svc.Client)
+}
+func (svc *ServiceClient) CheckUserBlocked(ctx *gin.Context) {
+	routes.CheckUserBlocked(ctx, svc.Client)
 }

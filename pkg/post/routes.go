@@ -17,8 +17,8 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	userAuthMiddleware := authMiddleware.UserAuthRequired
 
 	postrouts := r.Group("/post")
-	r.Use(userAuthMiddleware)
-	postrouts.POST("/follow/:follow_id", svc.FollowUser)
+	//r.Use(userAuthMiddleware)
+	postrouts.POST("/follow/:follow_id", userAuthMiddleware, svc.FollowUser)
 
 }
 

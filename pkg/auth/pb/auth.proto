@@ -12,6 +12,7 @@ service AuthService {
     rpc AdminLogin(AdminLoginRequest) returns (AdminLoginResponse) {}
     rpc AdminSignup(AdminSignupRequest) returns (AdminSignupResponse) {}
     rpc ForgotPassWord(ForgotPasswordRequest) returns (ForgotPasswordResponse){}
+    rpc CheckUserBlocked(CheckUserBlockedRequest) returns (CheckUserBlockedResponse){}
 
 
 }
@@ -91,4 +92,15 @@ message ForgotPasswordRequest{
 message ForgotPasswordResponse{
   int64 status = 1;
   string error = 2;
+}
+
+//CheckUserBlockedRequest and response
+
+message CheckUserBlockedRequest{
+    int64 id = 1;
+
+}
+message CheckUserBlockedResponse{
+    int64 status = 1;
+    bool isBlock=2;
 }

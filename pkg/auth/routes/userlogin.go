@@ -83,3 +83,23 @@ func ForgotPassWord(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+func CheckUserBlocked(ctx *gin.Context, p pb.AuthServiceClient) {
+	var checkblock pb.CheckUserBlockedRequest
+
+	err := ctx.BindJSON(&checkblock)
+
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error parsing request body,email ", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	res, err := p.CheckUserBlocked(ctx, &checkblock)
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting auth service", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "not blocked", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}
