@@ -43,15 +43,18 @@ message UploadPostRequest {
 }
 
 message UploadPostResponse {
-    int64 post_id = 1;
+    int64 user_id = 1;
+    
 }
 // Delete post request and response messages
 message DeletePostRequest {
     int64 post_id = 1;
+    int64 user_id = 2;
 }
 
 message DeletePostResponse {
     bool success = 1;
+    int64 post_id = 2;
 }
 
 
@@ -62,7 +65,7 @@ message LikePostRequest {
 }
 
 message LikePostResponse {
-    bool success = 1;
+    int64 post_id = 1;
 }
 
 // Dislike post request and response messages

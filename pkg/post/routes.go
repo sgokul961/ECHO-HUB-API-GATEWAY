@@ -19,7 +19,10 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	postrouts := r.Group("/post")
 	//r.Use(userAuthMiddleware)
 	postrouts.POST("/follow/:follow_id", userAuthMiddleware, svc.FollowUser)
-	postrouts.PATCH("/unfollow/:unfollow_id", userAuthMiddleware, svc.UnfollowUser)
+	postrouts.DELETE("/unfollow/:unfollow_id", userAuthMiddleware, svc.UnfollowUser)
+	postrouts.POST("/upload_post", userAuthMiddleware, svc.UploadPost)
+	postrouts.DELETE("/deletePost/:post_id", userAuthMiddleware, svc.DeletePost)
+	postrouts.POST("/like/:postId", userAuthMiddleware, svc.LikePost)
 
 }
 
@@ -28,4 +31,13 @@ func (svc *ServiceClient) FollowUser(ctx *gin.Context) {
 }
 func (svc *ServiceClient) UnfollowUser(ctx *gin.Context) {
 	routes.UnfollowUser(ctx, svc.Client)
+}
+func (svc *ServiceClient) UploadPost(ctx *gin.Context) {
+	routes.UploadPost(ctx, svc.Client)
+}
+func (svc *ServiceClient) DeletePost(ctx *gin.Context) {
+	routes.DeletePost(ctx, svc.Client)
+}
+func (svc *ServiceClient) LikePost(ctx *gin.Context) {
+	routes.LikePost(ctx, svc.Client)
 }

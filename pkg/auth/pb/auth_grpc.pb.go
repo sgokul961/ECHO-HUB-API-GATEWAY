@@ -29,6 +29,7 @@ type AuthServiceClient interface {
 	AdminSignup(ctx context.Context, in *AdminSignupRequest, opts ...grpc.CallOption) (*AdminSignupResponse, error)
 	ForgotPassWord(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error)
 	CheckUserBlocked(ctx context.Context, in *CheckUserBlockedRequest, opts ...grpc.CallOption) (*CheckUserBlockedResponse, error)
+	BlockUser(ctx context.Context, in *BlockUserRequest, opts ...grpc.CallOption) (*BlockUserResponse, error)
 }
 
 type authServiceClient struct {
@@ -102,6 +103,15 @@ func (c *authServiceClient) CheckUserBlocked(ctx context.Context, in *CheckUserB
 	return out, nil
 }
 
+func (c *authServiceClient) BlockUser(ctx context.Context, in *BlockUserRequest, opts ...grpc.CallOption) (*BlockUserResponse, error) {
+	out := new(BlockUserResponse)
+	err := c.cc.Invoke(ctx, "/api.pb.auth.AuthService/BlockUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -113,6 +123,7 @@ type AuthServiceServer interface {
 	AdminSignup(context.Context, *AdminSignupRequest) (*AdminSignupResponse, error)
 	ForgotPassWord(context.Context, *ForgotPasswordRequest) (*ForgotPasswordResponse, error)
 	CheckUserBlocked(context.Context, *CheckUserBlockedRequest) (*CheckUserBlockedResponse, error)
+	BlockUser(context.Context, *BlockUserRequest) (*BlockUserResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -140,6 +151,9 @@ func (UnimplementedAuthServiceServer) ForgotPassWord(context.Context, *ForgotPas
 }
 func (UnimplementedAuthServiceServer) CheckUserBlocked(context.Context, *CheckUserBlockedRequest) (*CheckUserBlockedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckUserBlocked not implemented")
+}
+func (UnimplementedAuthServiceServer) BlockUser(context.Context, *BlockUserRequest) (*BlockUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BlockUser not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -280,6 +294,24 @@ func _AuthService_CheckUserBlocked_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_BlockUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BlockUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).BlockUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.pb.auth.AuthService/BlockUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).BlockUser(ctx, req.(*BlockUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -314,6 +346,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckUserBlocked",
 			Handler:    _AuthService_CheckUserBlocked_Handler,
+		},
+		{
+			MethodName: "BlockUser",
+			Handler:    _AuthService_BlockUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
