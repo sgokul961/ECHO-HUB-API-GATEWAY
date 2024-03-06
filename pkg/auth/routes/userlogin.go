@@ -99,7 +99,13 @@ func CheckUserBlocked(ctx *gin.Context, p pb.AuthServiceClient) {
 		ctx.JSON(http.StatusBadGateway, errRes)
 		return
 	}
-	successRes := models.MakeResponse(http.StatusOK, "not blocked", res, nil)
+	if res.Status {
+		fmt.Println("blocked")
+	} else {
+		fmt.Println("not blocked")
+	}
+
+	successRes := models.MakeResponse(http.StatusOK, "User blocked status checked successfully", res.Status, nil)
 	ctx.JSON(http.StatusOK, successRes)
 
 }

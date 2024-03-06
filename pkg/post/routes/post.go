@@ -177,3 +177,33 @@ func LikePost(ctx *gin.Context, p pb.PostServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+func DislikePost(ctx *gin.Context, p pb.PostServiceClient) {
+	var dislike pb.DislikePostRequest
+	user_id, ok := ctx.Get("userId")
+
+	if !ok || user_id == nil {
+		errRes := models.MakeResponse(http.StatusUnauthorized, "user id is not valid ", nil, errors.New("user id is nil"))
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+
+	}
+	dislike.UserId = user_id.(int64)
+
+	PostId := ctx.Param("postId")
+	postIdint, err := strconv.ParseInt(PostId, 10, 64)
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid post id format"})
+		return
+	}
+	dislike.PostId = postIdint
+	res, err := p.DislikePost(ctx, &dislike)
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error in connecting with like postservice", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+
+	successRes := models.MakeResponse(http.StatusOK, "successfully disliked post", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}
