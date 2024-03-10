@@ -207,3 +207,95 @@ func DislikePost(ctx *gin.Context, p pb.PostServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
+// func CommentPost(ctx *gin.Context, p pb.PostServiceClient) {
+
+// 	user_id, ok := ctx.Get("userId")
+
+// 	if !ok || user_id == nil {
+// 		errRes := models.MakeResponse(http.StatusUnauthorized, "user id is not valid ", nil, errors.New("user id is nil"))
+// 		ctx.JSON(http.StatusUnauthorized, errRes)
+// 		return
+
+// 	}
+
+// 	PostId := ctx.Param("postid")
+
+// 	postIdint, err := strconv.ParseInt(PostId, 10, 64)
+// 	if err != nil {
+// 		ctx.JSON(400, gin.H{"error": "Invalid post id format"})
+// 		return
+// 	}
+
+// 	var comment pb.CommentPostRequest
+
+// 	if err := ctx.BindJSON(&comment); err != nil {
+// 		errRes := models.MakeResponse(http.StatusBadRequest, "error parsing the request body", nil, err.Error())
+// 		ctx.JSON(http.StatusBadRequest, errRes)
+// 		return
+// 	}
+
+// 	// Assign user ID and post ID to the comment
+// 	comment.UserId = user_id.(int64)
+// 	comment.PostId = postIdint
+// 	comment.Content = ctx.PostForm("content")
+
+// 	res, err := p.CommentPost(ctx, &comment)
+
+// 	if err != nil {
+// 		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting the post service ", nil, err.Error())
+// 		ctx.JSON(http.StatusBadGateway, errRes)
+// 		return
+// 	}
+// 	successRes := models.MakeResponse(http.StatusOK, "comment successfully added  ", res, nil)
+// 	ctx.JSON(http.StatusOK, successRes)
+
+// }
+func CommentPost(ctx *gin.Context, p pb.PostServiceClient) {
+	// Parse user ID from context
+	userID, ok := ctx.Get("userId")
+	if !ok || userID == nil {
+		errRes := models.MakeResponse(http.StatusUnauthorized, "user id is not valid", nil, errors.New("user id is nil"))
+		ctx.JSON(http.StatusUnauthorized, errRes)
+		return
+	}
+	fmt.Println("user id", userID)
+
+	// Parse post ID from URL parameter
+	postIDStr := ctx.Param("post_id")
+	postID, err := strconv.ParseInt(postIDStr, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post id format"})
+		return
+	}
+	fmt.Println("post id is", postID)
+
+	// Parse request body
+
+	var comment pb.CommentPostRequest
+
+	// if err := ctx.BindJSON(&comment); err != nil {
+	// 	errRes := models.MakeResponse(http.StatusBadRequest, "error parsing the request body: "+err.Error(), nil, err.Error())
+	// 	ctx.JSON(http.StatusBadRequest, errRes)
+	// 	return
+	// }
+
+	// Assign user ID, post ID, and content to the comment
+	comment.UserId = userID.(int64)
+	comment.PostId = postID
+	fmt.Println("postid", postID)
+	comment.Content = ctx.Request.FormValue("content")
+	fmt.Println("content", comment.Content)
+
+	// Call the gRPC method to send the comment to the post service
+	res, err := p.CommentPost(ctx, &comment)
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting to the post service", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+
+	// Respond with success message
+	successRes := models.MakeResponse(http.StatusOK, "comment successfully added", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+}

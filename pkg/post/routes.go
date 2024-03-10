@@ -24,6 +24,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	postrouts.DELETE("/deletePost/:post_id", userAuthMiddleware, svc.DeletePost)
 	postrouts.POST("/like/:postId", userAuthMiddleware, svc.LikePost)
 	postrouts.DELETE("/dislike/:postId", userAuthMiddleware, svc.DislikePost)
+	postrouts.POST("/comment/:post_id", userAuthMiddleware, svc.CommentPost)
 
 }
 
@@ -44,4 +45,7 @@ func (svc *ServiceClient) LikePost(ctx *gin.Context) {
 }
 func (svc *ServiceClient) DislikePost(ctx *gin.Context) {
 	routes.DislikePost(ctx, svc.Client)
+}
+func (svc *ServiceClient) CommentPost(ctx *gin.Context) {
+	routes.CommentPost(ctx, svc.Client)
 }
