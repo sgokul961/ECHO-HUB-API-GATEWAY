@@ -10,7 +10,22 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/models"
 )
 
-// handler for a new user to register in the social meadia
+// @Summary		Register a new user
+// @Description	Register a new user with the provided information
+// @Tags			Authentication
+// @Accept			multipart/form-data
+// @Produce		json
+// @Param			email			formData	string			true	"User's email address"
+// @Param			password		formData	string			true	"User's password"
+// @Param			phonenum		formData	string			true	"User's phone number"
+// @Param			username		formData	string			true	"User's username"
+// @Param			bio				formData	string			false	"User's bio"
+// @Param			gender			formData	string			false	"User's gender"
+// @Param			profile_picture	formData	file			true	"User's profile picture"
+// @Success		200				{object}	models.Response	"Success"
+// @Failure		400				{object}	models.Response	"Bad Request"
+// @Failure		502				{object}	models.Response	"Bad Gateway"
+// @Router			/auth/register [post]
 func Register(ctx *gin.Context, c pb.AuthServiceClient) {
 
 	err := ctx.Request.ParseMultipartForm(10 << 20)

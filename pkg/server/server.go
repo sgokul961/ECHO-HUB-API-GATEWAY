@@ -5,6 +5,8 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/auth"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/config"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/post"
+	swaggerfiles "github.com/swaggo/files"     // swagger embed files
+	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
 
 type Server struct {
@@ -14,6 +16,7 @@ type Server struct {
 
 func NewServer(cfg *config.Config) *Server {
 	r := gin.Default()
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	// Register routes for authentication service
 	authSvc := auth.RegisterRoutes(r, *cfg)
