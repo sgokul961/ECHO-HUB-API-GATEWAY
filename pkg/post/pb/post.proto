@@ -15,6 +15,7 @@ service PostService {
     rpc ReportPost(ReportPostRequest) returns (ReportPostResponse){}
     rpc CommentPost(CommentPostRequest) returns (CommentPostResponse){}
     rpc GetComments(GetCommentsRequest) returns (GetCommentsResponse){}
+    rpc DeleteComments(DeleteCommentRequest) returns (DeleteCommentResponse){}
 
 }
 // Follow user request and response messages
@@ -126,4 +127,18 @@ message ReportPostRequest {
 
 message ReportPostResponse {
     bool success = 1;
+}
+
+//Delete Comment Request and Response
+
+message DeleteCommentRequest{
+    int64 post_id = 1;
+    int64 comment_id = 2;
+    int64 user_id= 3;
+}
+
+message DeleteCommentResponse{
+    int64 comment_id = 1;
+    bool success =2 ;
+
 }
