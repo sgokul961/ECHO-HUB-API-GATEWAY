@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Port         string `mapstructure:"PORT"`
-	AuthHubUrl   string `mapstructure:"auth_hub_url"`
-	PostHubUrl   string `mapstructure:"post_hub_url"`
-	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
+	Port               string `mapstructure:"PORT"`
+	AuthHubUrl         string `mapstructure:"auth_hub_url"`
+	PostHubUrl         string `mapstructure:"post_hub_url"`
+	NotificationHubUrl string `mapstructure:"notification_hub_url"`
+	JWTSecretKey       string `mapstructure:"JWT_SECRET_KEY"`
 
 	//add image to aws s3 bucket
 	AWS_REGION            string `mapstructure:"AWS_REGION"`
