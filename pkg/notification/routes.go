@@ -19,10 +19,22 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	notifyRouts := r.Group("/notify")
 	notifyRouts.POST("/commentNotification", userAuthMiddleware, svc.SendCommentedNotification)
 
+	notifyRouts.POST("/likeNotification/:postId", userAuthMiddleware, svc.SendLikeNotification)
+	notifyRouts.GET("/consume/like", userAuthMiddleware, svc.ConsumeKafkaMessages)
+
 }
 
 func (svc *ServiceClient) SendCommentedNotification(ctx *gin.Context) {
 
 	notification_routes.SendCommentedNotification(ctx, svc.Client)
+
+}
+func (svc *ServiceClient) SendLikeNotification(ctx *gin.Context) {
+
+	notification_routes.SendLikeNotification(ctx, svc.Client)
+
+}
+func (svc *ServiceClient) ConsumeKafkaMessages(ctx *gin.Context) {
+	notification_routes.ConsumeKafkaMessages(ctx, svc.Client)
 
 }

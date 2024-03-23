@@ -16,6 +16,8 @@ service PostService {
     rpc CommentPost(CommentPostRequest) returns (CommentPostResponse){}
     rpc GetComments(GetCommentsRequest) returns (GetCommentsResponse){}
     rpc DeleteComments(DeleteCommentRequest) returns (DeleteCommentResponse){}
+    rpc GetUserId(GetUserIdRequest)  returns (GetUserIdResponse){}
+
 
 }
 // Follow user request and response messages
@@ -45,12 +47,12 @@ message UploadPostRequest {
 
 message UploadPostResponse {
     int64 user_id = 1;
-    
 }
 // Delete post request and response messages
 message DeletePostRequest {
     int64 post_id = 1;
     int64 user_id = 2;
+
 }
 
 message DeletePostResponse {
@@ -138,7 +140,17 @@ message DeleteCommentRequest{
 }
 
 message DeleteCommentResponse{
-    int64 comment_id = 1;
-    bool success =2 ;
+    int64 comment_id =1;
+    bool success = 2;
+    
+}
 
+message GetUserIdRequest{
+    int64 post_id= 1;
+
+}
+message GetUserIdResponse{
+    int64 user_id =1;
+    bool success =2;
+    
 }

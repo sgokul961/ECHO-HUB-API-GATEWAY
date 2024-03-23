@@ -33,6 +33,7 @@ type PostServiceClient interface {
 	CommentPost(ctx context.Context, in *CommentPostRequest, opts ...grpc.CallOption) (*CommentPostResponse, error)
 	GetComments(ctx context.Context, in *GetCommentsRequest, opts ...grpc.CallOption) (*GetCommentsResponse, error)
 	DeleteComments(ctx context.Context, in *DeleteCommentRequest, opts ...grpc.CallOption) (*DeleteCommentResponse, error)
+	GetUserId(ctx context.Context, in *GetUserIdRequest, opts ...grpc.CallOption) (*GetUserIdResponse, error)
 }
 
 type postServiceClient struct {
@@ -142,6 +143,15 @@ func (c *postServiceClient) DeleteComments(ctx context.Context, in *DeleteCommen
 	return out, nil
 }
 
+func (c *postServiceClient) GetUserId(ctx context.Context, in *GetUserIdRequest, opts ...grpc.CallOption) (*GetUserIdResponse, error) {
+	out := new(GetUserIdResponse)
+	err := c.cc.Invoke(ctx, "/api.pb.post.PostService/GetUserId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
@@ -157,6 +167,7 @@ type PostServiceServer interface {
 	CommentPost(context.Context, *CommentPostRequest) (*CommentPostResponse, error)
 	GetComments(context.Context, *GetCommentsRequest) (*GetCommentsResponse, error)
 	DeleteComments(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error)
+	GetUserId(context.Context, *GetUserIdRequest) (*GetUserIdResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -196,6 +207,9 @@ func (UnimplementedPostServiceServer) GetComments(context.Context, *GetCommentsR
 }
 func (UnimplementedPostServiceServer) DeleteComments(context.Context, *DeleteCommentRequest) (*DeleteCommentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteComments not implemented")
+}
+func (UnimplementedPostServiceServer) GetUserId(context.Context, *GetUserIdRequest) (*GetUserIdResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserId not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 
@@ -408,6 +422,24 @@ func _PostService_DeleteComments_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetUserId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.pb.post.PostService/GetUserId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetUserId(ctx, req.(*GetUserIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -458,6 +490,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteComments",
 			Handler:    _PostService_DeleteComments_Handler,
+		},
+		{
+			MethodName: "GetUserId",
+			Handler:    _PostService_GetUserId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

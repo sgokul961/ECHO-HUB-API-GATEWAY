@@ -33,9 +33,32 @@ service NotificationService {
 
   // Method to send a notification message to Kafka topic
   rpc SendKafkaNotification (KafkaNotification) returns (NotificationResponse) {}
+
+
+  rpc SendLikeNotification (LikeNotification) returns (NotificationResponse) {}
+
+  rpc ConsumeKafkaMessages(Empty) returns (stream NotificationMessage);
+
 }
 
+
+//LikeNotification Request
+message LikeNotification{
+  int64 post_id = 1;
+  int64 user_id = 2;
+  
+
+}
+
+
 // Response message for the notification service
+
 message NotificationResponse {
   string message = 1;
 }
+message NotificationMessage {
+  int64 post_id = 1;
+  int64 user_id = 2;
+  string message = 3;
+}
+message Empty {}

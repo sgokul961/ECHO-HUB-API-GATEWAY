@@ -28,6 +28,8 @@ type NotificationServiceClient interface {
 	SendFollowedNotification(ctx context.Context, in *FollowedNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
 	// Method to send a notification message to Kafka topic
 	SendKafkaNotification(ctx context.Context, in *KafkaNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
+	SendLikeNotification(ctx context.Context, in *LikeNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
+	ConsumeKafkaMessages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (NotificationService_ConsumeKafkaMessagesClient, error)
 }
 
 type notificationServiceClient struct {
@@ -65,6 +67,47 @@ func (c *notificationServiceClient) SendKafkaNotification(ctx context.Context, i
 	return out, nil
 }
 
+func (c *notificationServiceClient) SendLikeNotification(ctx context.Context, in *LikeNotification, opts ...grpc.CallOption) (*NotificationResponse, error) {
+	out := new(NotificationResponse)
+	err := c.cc.Invoke(ctx, "/notification.NotificationService/SendLikeNotification", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) ConsumeKafkaMessages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (NotificationService_ConsumeKafkaMessagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &NotificationService_ServiceDesc.Streams[0], "/notification.NotificationService/ConsumeKafkaMessages", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &notificationServiceConsumeKafkaMessagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type NotificationService_ConsumeKafkaMessagesClient interface {
+	Recv() (*NotificationMessage, error)
+	grpc.ClientStream
+}
+
+type notificationServiceConsumeKafkaMessagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *notificationServiceConsumeKafkaMessagesClient) Recv() (*NotificationMessage, error) {
+	m := new(NotificationMessage)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility
@@ -75,6 +118,8 @@ type NotificationServiceServer interface {
 	SendFollowedNotification(context.Context, *FollowedNotification) (*NotificationResponse, error)
 	// Method to send a notification message to Kafka topic
 	SendKafkaNotification(context.Context, *KafkaNotification) (*NotificationResponse, error)
+	SendLikeNotification(context.Context, *LikeNotification) (*NotificationResponse, error)
+	ConsumeKafkaMessages(*Empty, NotificationService_ConsumeKafkaMessagesServer) error
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -90,6 +135,12 @@ func (UnimplementedNotificationServiceServer) SendFollowedNotification(context.C
 }
 func (UnimplementedNotificationServiceServer) SendKafkaNotification(context.Context, *KafkaNotification) (*NotificationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendKafkaNotification not implemented")
+}
+func (UnimplementedNotificationServiceServer) SendLikeNotification(context.Context, *LikeNotification) (*NotificationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendLikeNotification not implemented")
+}
+func (UnimplementedNotificationServiceServer) ConsumeKafkaMessages(*Empty, NotificationService_ConsumeKafkaMessagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method ConsumeKafkaMessages not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 
@@ -158,6 +209,45 @@ func _NotificationService_SendKafkaNotification_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_SendLikeNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LikeNotification)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).SendLikeNotification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/notification.NotificationService/SendLikeNotification",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).SendLikeNotification(ctx, req.(*LikeNotification))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_ConsumeKafkaMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(NotificationServiceServer).ConsumeKafkaMessages(m, &notificationServiceConsumeKafkaMessagesServer{stream})
+}
+
+type NotificationService_ConsumeKafkaMessagesServer interface {
+	Send(*NotificationMessage) error
+	grpc.ServerStream
+}
+
+type notificationServiceConsumeKafkaMessagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *notificationServiceConsumeKafkaMessagesServer) Send(m *NotificationMessage) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -177,7 +267,17 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SendKafkaNotification",
 			Handler:    _NotificationService_SendKafkaNotification_Handler,
 		},
+		{
+			MethodName: "SendLikeNotification",
+			Handler:    _NotificationService_SendLikeNotification_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ConsumeKafkaMessages",
+			Handler:       _NotificationService_ConsumeKafkaMessages_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "pkg/notification/pb/notification.proto",
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/auth"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/config"
+	"github.com/sgokul961/echo-hub-api-gateway/pkg/notification"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/post"
 	swaggerfiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
@@ -21,6 +22,7 @@ func NewServer(cfg *config.Config) *Server {
 	// Register routes for authentication service
 	authSvc := auth.RegisterRoutes(r, *cfg)
 	post.RegisterRoutes(r, *cfg, authSvc)
+	notification.RegisterRoutes(r, *cfg, authSvc)
 
 	return &Server{
 		router: r,

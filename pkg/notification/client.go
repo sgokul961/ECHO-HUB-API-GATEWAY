@@ -14,7 +14,7 @@ type ServiceClient struct {
 }
 
 func InitServiceClient(c *config.Config) pb.NotificationServiceClient {
-	cc, err := grpc.Dial(c.PostHubUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cc, err := grpc.Dial(c.NotificationHubUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		fmt.Println("coudnt connect:", err)

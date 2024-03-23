@@ -265,7 +265,7 @@ func GetComments(ctx *gin.Context, p pb.PostServiceClient) {
 		ctx.JSON(http.StatusBadGateway, errRes)
 		return
 	}
-	successRes := models.MakeResponse(http.StatusOK, "USuccessfully got all comments", res, nil)
+	successRes := models.MakeResponse(http.StatusOK, "Successfully got all comments", res, nil)
 	ctx.JSON(http.StatusOK, successRes)
 
 }
@@ -307,6 +307,28 @@ func DeleteComments(ctx *gin.Context, p pb.PostServiceClient) {
 	}
 
 	successRes := models.MakeResponse(http.StatusOK, "successfully deleted  comment", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}
+func GetUserId(ctx *gin.Context, p pb.PostServiceClient) {
+
+	var getUserIdOfPost pb.GetUserIdRequest
+
+	err := ctx.BindJSON(&getUserIdOfPost)
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error parsing request body ", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+
+	res, err := p.GetUserId(ctx, &getUserIdOfPost)
+
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting post service", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "Successfully got userId", res, nil)
 	ctx.JSON(http.StatusOK, successRes)
 
 }

@@ -27,6 +27,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	postrouts.POST("/comment/:post_id", userAuthMiddleware, svc.CommentPost)
 	postrouts.GET("/getcomment", userAuthMiddleware, svc.GetComments)
 	postrouts.DELETE("/:post_id", userAuthMiddleware, svc.DeleteComments)
+	postrouts.GET("/postOwner", userAuthMiddleware, svc.GetUserId)
 
 }
 
@@ -56,4 +57,7 @@ func (svc *ServiceClient) GetComments(ctx *gin.Context) {
 }
 func (svc *ServiceClient) DeleteComments(ctx *gin.Context) {
 	routes.DeleteComments(ctx, svc.Client)
+}
+func (svc *ServiceClient) GetUserId(ctx *gin.Context) {
+	routes.GetUserId(ctx, svc.Client)
 }
