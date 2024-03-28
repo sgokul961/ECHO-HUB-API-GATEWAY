@@ -109,3 +109,31 @@ func CheckUserBlocked(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+func FetchShortDetails(ctx *gin.Context, p pb.AuthServiceClient) {
+
+	var fetch pb.FetchShortDetailsRequest
+
+	err := ctx.BindJSON(&fetch)
+
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error parsing request body,id ", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+
+	res, err := p.FetchShortDetails(ctx, &fetch)
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting auth service", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	fmt.Println("id:", res.Id, "image:", res.Image, "name:", res.Image)
+	// response := pb.FetchShortDetailsResponse{
+	// 	Id:    res.Id,
+	// 	Name:  res.Name,
+	// 	Image: res.Image,
+	// }
+	successRes := models.MakeResponse(http.StatusOK, "Successfyllly got all details", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}

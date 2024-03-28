@@ -7,7 +7,7 @@ option go_package = "github.com/sgokul961/echo-hub-notification-svc/pkg/pb";
 // Message for when a user comments on a post
 message CommentedNotification {
   string postId = 1;
-  string commenterId = 2;
+  string commenterId = 2; 
   string comment = 3;
 }
 

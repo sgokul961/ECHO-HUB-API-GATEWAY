@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "github.com/sgokul961/echo-hub-chat-svc/pkg/pb";
+
+service ChatService {
+    rpc Chat (SendMessageRequest) returns (SendMessageResponse) {}
+    rpc CreateChatRoom (ChatRoomRequest) returns (ChatRoomResponse) {}
+    rpc SaveMessage (SaveMessageRequest) returns (SaveMessageResponse) {}
+    rpc FetchRecipient (FetchRecipientRequest) returns (FetchRecipientResponse) {}
+}
+
+message SendMessageRequest {
+    int64 user_id = 1;
+    string chat_id = 2;
+}
+
+message SendMessageResponse {
+    string status = 1;
+    string error_message = 2;
+}
+
+
+message ChatRoomRequest{
+    int64 Following_id =1;
+    int64 FOllower_id =2;
+}
+
+message ChatRoomResponse{
+    string error =1;
+}
+message SaveMessageRequest{
+    string chat_id = 1;
+    int64 user_id = 2;
+    string messages = 3;
+}
+message SaveMessageResponse{
+    string res = 1;
+    string error =2;
+    
+}
+
+message FetchRecipientRequest{
+    string chat_id =1;
+    int64 user_id =2;
+}
+message FetchRecipientResponse{
+    int64 recipient =1;
+    string error =2;
+    
+}

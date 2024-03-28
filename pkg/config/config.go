@@ -11,6 +11,7 @@ type Config struct {
 	AuthHubUrl         string `mapstructure:"auth_hub_url"`
 	PostHubUrl         string `mapstructure:"post_hub_url"`
 	NotificationHubUrl string `mapstructure:"notification_hub_url"`
+	ChatHubUrl         string `mapstructure:"chat_hub_url"`
 	JWTSecretKey       string `mapstructure:"JWT_SECRET_KEY"`
 
 	//add image to aws s3 bucket

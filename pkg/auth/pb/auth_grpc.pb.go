@@ -31,6 +31,7 @@ type AuthServiceClient interface {
 	CheckUserBlocked(ctx context.Context, in *CheckUserBlockedRequest, opts ...grpc.CallOption) (*CheckUserBlockedResponse, error)
 	BlockUser(ctx context.Context, in *BlockUserRequest, opts ...grpc.CallOption) (*BlockUserResponse, error)
 	UnblockUser(ctx context.Context, in *UnblockUserRequest, opts ...grpc.CallOption) (*UnblockUserResponse, error)
+	FetchShortDetails(ctx context.Context, in *FetchShortDetailsRequest, opts ...grpc.CallOption) (*FetchShortDetailsResponse, error)
 }
 
 type authServiceClient struct {
@@ -122,6 +123,15 @@ func (c *authServiceClient) UnblockUser(ctx context.Context, in *UnblockUserRequ
 	return out, nil
 }
 
+func (c *authServiceClient) FetchShortDetails(ctx context.Context, in *FetchShortDetailsRequest, opts ...grpc.CallOption) (*FetchShortDetailsResponse, error) {
+	out := new(FetchShortDetailsResponse)
+	err := c.cc.Invoke(ctx, "/api.pb.auth.AuthService/FetchShortDetails", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -135,6 +145,7 @@ type AuthServiceServer interface {
 	CheckUserBlocked(context.Context, *CheckUserBlockedRequest) (*CheckUserBlockedResponse, error)
 	BlockUser(context.Context, *BlockUserRequest) (*BlockUserResponse, error)
 	UnblockUser(context.Context, *UnblockUserRequest) (*UnblockUserResponse, error)
+	FetchShortDetails(context.Context, *FetchShortDetailsRequest) (*FetchShortDetailsResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -168,6 +179,9 @@ func (UnimplementedAuthServiceServer) BlockUser(context.Context, *BlockUserReque
 }
 func (UnimplementedAuthServiceServer) UnblockUser(context.Context, *UnblockUserRequest) (*UnblockUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnblockUser not implemented")
+}
+func (UnimplementedAuthServiceServer) FetchShortDetails(context.Context, *FetchShortDetailsRequest) (*FetchShortDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FetchShortDetails not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -344,6 +358,24 @@ func _AuthService_UnblockUser_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_FetchShortDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FetchShortDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).FetchShortDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.pb.auth.AuthService/FetchShortDetails",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).FetchShortDetails(ctx, req.(*FetchShortDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -386,6 +418,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnblockUser",
 			Handler:    _AuthService_UnblockUser_Handler,
+		},
+		{
+			MethodName: "FetchShortDetails",
+			Handler:    _AuthService_FetchShortDetails_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

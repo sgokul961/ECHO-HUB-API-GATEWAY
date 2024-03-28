@@ -27,6 +27,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config) *ServiceClient {
 
 	authRoutes.Use(userAuthMiddleware)
 	authRoutes.PATCH("/resetPassword", userAuthMiddleware, svc.ResetPassword)
+	authRoutes.GET("/fetchUser", userAuthMiddleware, svc.FetchShortDetails)
 
 	//roots accesible for admin
 
@@ -71,4 +72,7 @@ func (svc *ServiceClient) BlockUser(ctx *gin.Context) {
 }
 func (svc *ServiceClient) UnblockUser(ctx *gin.Context) {
 	routes.UnblockUser(ctx, svc.Client)
+}
+func (svc *ServiceClient) FetchShortDetails(ctx *gin.Context) {
+	routes.FetchShortDetails(ctx, svc.Client)
 }

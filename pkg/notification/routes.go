@@ -20,7 +20,7 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 	notifyRouts.POST("/commentNotification", userAuthMiddleware, svc.SendCommentedNotification)
 
 	notifyRouts.POST("/likeNotification/:postId", userAuthMiddleware, svc.SendLikeNotification)
-	notifyRouts.GET("/consume/like", userAuthMiddleware, svc.ConsumeKafkaMessages)
+	notifyRouts.GET("/consume/like", svc.ConsumeKafkaMessages)
 
 }
 

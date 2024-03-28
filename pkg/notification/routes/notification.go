@@ -47,43 +47,6 @@ func SendLikeNotification(ctx *gin.Context, p pb.NotificationServiceClient) {
 
 //stream notification messages messages
 
-// func ConsumeKafkaMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
-// 	// Call the gRPC method to start streaming Kafka messages
-// 	stream, err := p.ConsumeKafkaMessages(ctx, &pb.Empty{})
-// 	if err != nil {
-// 		errRes := models.MakeResponse(http.StatusInternalServerError, "error while receiving Kafka message from stream", nil, err.Error())
-// 		ctx.JSON(http.StatusInternalServerError, errRes)
-// 		return
-// 	}
-
-// 	// Stream Kafka messages to the client
-// 	ctx.Stream(func(w io.Writer) bool {
-// 		// Receive next Kafka message from the stream
-// 		message, err := stream.Recv()
-// 		if err == io.EOF {
-// 			// End of stream
-// 			return false
-// 		}
-// 		if err != nil {
-// 			// Handle error
-// 			errRes := models.MakeResponse(http.StatusInternalServerError, "error while receiving Kafka message from stream", nil, err.Error())
-// 			ctx.JSON(http.StatusInternalServerError, errRes)
-// 			return false
-// 		}
-
-// 		// Process the Kafka message as needed (e.g., log, store in database, etc.)
-// 		fmt.Printf("Received Kafka message: %+v\n", message)
-
-// 		// Send the Kafka message to the client
-// 		ctx.SSEvent("message", message)
-
-// 		// Continue streaming
-// 		return true
-// 	})
-// 	// Close the stream
-// 	stream.CloseSend()
-// }
-
 func ConsumeKafkaMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
 	// Call the gRPC method to start streaming Kafka messages
 	stream, err := p.ConsumeKafkaMessages(ctx, &pb.Empty{})
@@ -93,16 +56,8 @@ func ConsumeKafkaMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
 		return
 	}
 
-	// Variable to track if a message has been received
-	messageReceived := false
-
 	// Stream Kafka messages to the client
 	ctx.Stream(func(w io.Writer) bool {
-		if messageReceived {
-			// If a message has already been received, close the stream
-			return false
-		}
-
 		// Receive next Kafka message from the stream
 		message, err := stream.Recv()
 		if err == io.EOF {
@@ -122,13 +77,58 @@ func ConsumeKafkaMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
 		// Send the Kafka message to the client
 		ctx.SSEvent("message", message)
 
-		// Set messageReceived to true to indicate that a message has been received
-		messageReceived = true
-
 		// Continue streaming
 		return true
 	})
-
 	// Close the stream
 	stream.CloseSend()
 }
+
+// func ConsumeKafkaMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
+// 	// Call the gRPC method to start streaming Kafka messages
+// 	stream, err := p.ConsumeKafkaMessages(ctx, &pb.Empty{})
+// 	if err != nil {
+// 		errRes := models.MakeResponse(http.StatusInternalServerError, "error while receiving Kafka message from stream", nil, err.Error())
+// 		ctx.JSON(http.StatusInternalServerError, errRes)
+// 		return
+// 	}
+
+// 	// Variable to track if a message has been received
+// 	messageReceived := false
+
+// 	// Stream Kafka messages to the client
+// 	ctx.Stream(func(w io.Writer) bool {
+// 		if messageReceived {
+// 			// If a message has already been received, close the stream
+// 			return false
+// 		}
+
+// 		// Receive next Kafka message from the stream
+// 		message, err := stream.Recv()
+// 		if err == io.EOF {
+// 			// End of stream
+// 			return false
+// 		}
+// 		if err != nil {
+// 			// Handle error
+// 			errRes := models.MakeResponse(http.StatusInternalServerError, "error while receiving Kafka message from stream", nil, err.Error())
+// 			ctx.JSON(http.StatusInternalServerError, errRes)
+// 			return false
+// 		}
+
+// 		// Process the Kafka message as needed (e.g., log, store in database, etc.)
+// 		fmt.Printf("Received Kafka message: %+v\n", message)
+
+// 		// Send the Kafka message to the client
+// 		ctx.SSEvent("message", message)
+
+// 		// Set messageReceived to true to indicate that a message has been received
+// 		messageReceived = true
+
+// 		// Continue streaming
+// 		return true
+// 	})
+
+// Close the stream
+// 	stream.CloseSend()
+// }
