@@ -1,12 +1,14 @@
 package routsC
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/chat/pb"
+	"github.com/sgokul961/echo-hub-api-gateway/pkg/models"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/response"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -29,128 +31,45 @@ var (
 	user       = make(map[int64]*websocket.Conn)
 )
 
-// func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
-// 	userid, ok := ctx.Get("userId")
-// 	if !ok || userid == nil {
-// 		ctx.JSON(401, gin.H{"error": "userId not found in context or is nil"})
-// 		return
-// 	}
-
-// 	chatID := ctx.Param("chatId")
-
-// 	// Assuming you have a context to pass to the gRPC call, if not, use `context.Background()`
-// 	res, err := p.Chat(ctx, &pb.SendMessageRequest{
-// 		UserId: userid.(int64),
-// 		ChatId: chatID, // chatID is already a string
-// 	})
-// 	if err != nil {
-// 		ctx.JSON(500, gin.H{"error": "Failed to send message"})
-// 		return
-// 	}
-// 	successRes := models.MakeResponse(http.StatusOK, "successfully unfollowed user", res, nil)
-// 	ctx.JSON(http.StatusOK, successRes)
-// }
-
-// func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
-// 	//conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-// 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
-
-// 	if err != nil {
-// 		errRes := response.MakeResponse(http.StatusBadRequest, "data is not in required format", nil, err.Error())
-// 		ctx.JSON(http.StatusBadRequest, errRes)
-// 		return
-// 	}
-// 	userid, ok := ctx.Get("userId")
-// 	if !ok || userid == nil {
-// 		ctx.JSON(401, gin.H{"error": "userId not found in context or is nil"})
-// 		return
-// 	}
-// 	userIdInt64 := userid.(int64)
-// 	chat_id, err := primitive.ObjectIDFromHex(ctx.Param("chatId"))
-// 	if err != nil {
-// 		errRes := response.MakeResponse(http.StatusBadRequest, "string conversion failed", nil, err.Error())
-// 		ctx.JSON(http.StatusBadRequest, errRes)
-// 		return
-// 	}
-
-// 	connection[conn] = &client{ChatId: chat_id, UserId: userIdInt64}
-// 	user[userIdInt64] = conn
-// 	go func() {
-
-// 		for {
-// 			_, msg, err := conn.ReadMessage()
-// 			if err != nil {
-// 				break
-// 			}
-// 			userId := connection[conn].UserId
-// 			chatID := connection[conn].ChatId
-
-// 			_, err = p.SaveMessage(ctx, &pb.SaveMessageRequest{
-// 				ChatId:   chatID.Hex(),
-// 				UserId:   userIdInt64,
-// 				Messages: string(msg),
-// 			})
-// 			if err != nil {
-// 				fmt.Println("Error saving message:", err)
-// 				break
-// 			}
-
-// 			conn.WriteMessage(websocket.TextMessage, msg)
-
-// 			recipient, err := p.FetchRecipient(ctx, &pb.FetchRecipientRequest{
-// 				ChatId: chatID.Hex(),
-// 				UserId: userId,
-// 			})
-// 			if err != nil {
-// 				fmt.Println("Error fetching recipient:", err)
-// 				break
-// 			}
-// 			recipientID := recipient.GetRecipient()
-
-// 			if value, ok := user[recipientID]; ok {
-// 				err = value.WriteMessage(websocket.TextMessage, msg)
-// 				if err != nil {
-// 					delete(connection, value)
-// 					delete(user, recipientID)
-// 				}
-// 			}
-// 		}
-// 	}()
-
-// }
-
 func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
+
 	conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+
 	if err != nil {
 		errRes := response.MakeResponse(http.StatusBadRequest, "data is not in required format", nil, err.Error())
 		ctx.JSON(http.StatusBadRequest, errRes)
 		return
 	}
-	fmt.Println("WebSocket connection established.")
 
 	userid, ok := ctx.Get("userId")
+
 	if !ok || userid == nil {
 		ctx.JSON(401, gin.H{"error": "userId not found in context or is nil"})
 		return
 	}
+
 	userIdInt64 := userid.(int64)
+	//==================================================================================//getting user id from context
 
-	fmt.Println("useridint:", userIdInt64)
-	chat_id, err := primitive.ObjectIDFromHex(ctx.Param("chatId"))
-
-	fmt.Println("chatid from hex :", chat_id)
-	if err != nil {
-		errRes := response.MakeResponse(http.StatusBadRequest, "string conversion failed", nil, err.Error())
-		ctx.JSON(http.StatusBadRequest, errRes)
+	chatID := ctx.Query("chatID")
+	if chatID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "chatID parameter is missing"})
 		return
 	}
 
-	connection[conn] = &client{ChatId: chat_id, UserId: userIdInt64}
+	objectChatId, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		fmt.Println("Error converting chatID to ObjectID:", err)
+		return
+	}
+	//=================================================================================//getting  chat id from query parameater
+
+	connection[conn] = &client{ChatId: objectChatId, UserId: userIdInt64}
 	user[userIdInt64] = conn
 	go func() {
+
 		for {
 			_, msg, err := conn.ReadMessage()
-			fmt.Println("message is ", msg)
 			if err != nil {
 				break
 			}
@@ -158,7 +77,7 @@ func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
 			chatID := connection[conn].ChatId
 
 			_, err = p.SaveMessage(ctx, &pb.SaveMessageRequest{
-				ChatId:   chatID.Hex(),
+				ChatId:   objectChatId.Hex(),
 				UserId:   userIdInt64,
 				Messages: string(msg),
 			})
@@ -167,13 +86,12 @@ func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
 				break
 			}
 
-			conn.WriteMessage(websocket.TextMessage, msg) // Changed from ctx.Writer to conn
+			conn.WriteMessage(websocket.TextMessage, msg)
 
 			recipient, err := p.FetchRecipient(ctx, &pb.FetchRecipientRequest{
 				ChatId: chatID.Hex(),
 				UserId: userId,
 			})
-			fmt.Println("recipient ", recipient)
 			if err != nil {
 				fmt.Println("Error fetching recipient:", err)
 				break
@@ -181,7 +99,7 @@ func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
 			recipientID := recipient.GetRecipient()
 
 			if value, ok := user[recipientID]; ok {
-				err = value.WriteMessage(websocket.TextMessage, msg) // Changed from ctx.Writer to value
+				err = value.WriteMessage(websocket.TextMessage, msg)
 				if err != nil {
 					delete(connection, value)
 					delete(user, recipientID)
@@ -189,4 +107,51 @@ func Chat(ctx *gin.Context, p pb.ChatServiceClient) {
 			}
 		}
 	}()
+}
+func Getchats(ctx *gin.Context, p pb.ChatServiceClient) {
+
+	var GetChat pb.GetchatsRequest
+
+	userID, ok := ctx.Get("userId")
+	if !ok || userID == nil {
+		errRes := models.MakeResponse(http.StatusUnauthorized, "user id is not valid", nil, errors.New("user id is nil"))
+		ctx.JSON(http.StatusUnauthorized, errRes)
+		return
+	}
+
+	GetChat.UserId = userID.(int64)
+
+	res, err := p.Getchats(ctx, &GetChat)
+
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error in connecting with  chat service ", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "successfully got  all chats ", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}
+func GetMessages(ctx *gin.Context, p pb.ChatServiceClient) {
+
+	var GetMessage pb.GetMessagesRequest
+
+	chatID := ctx.Param("chatId")
+	fmt.Println("chat id is ", chatID)
+	if chatID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "chatID parameter is missing"})
+		return
+	}
+	GetMessage.ChatId = chatID
+
+	res, err := p.GetMessages(ctx, &GetMessage)
+
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error in connecting with  chat service ", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "successfully got  all messages ", res.GetMessages(), nil)
+	ctx.JSON(http.StatusOK, successRes)
+
 }

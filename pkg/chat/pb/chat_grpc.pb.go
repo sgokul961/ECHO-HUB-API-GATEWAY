@@ -26,6 +26,9 @@ type ChatServiceClient interface {
 	CreateChatRoom(ctx context.Context, in *ChatRoomRequest, opts ...grpc.CallOption) (*ChatRoomResponse, error)
 	SaveMessage(ctx context.Context, in *SaveMessageRequest, opts ...grpc.CallOption) (*SaveMessageResponse, error)
 	FetchRecipient(ctx context.Context, in *FetchRecipientRequest, opts ...grpc.CallOption) (*FetchRecipientResponse, error)
+	Getchats(ctx context.Context, in *GetchatsRequest, opts ...grpc.CallOption) (*GetchatsResponse, error)
+	GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesReponse, error)
+	MakeMessageRead(ctx context.Context, in *MakeMessageReadRequest, opts ...grpc.CallOption) (*MakeMessageReadResponse, error)
 }
 
 type chatServiceClient struct {
@@ -72,6 +75,33 @@ func (c *chatServiceClient) FetchRecipient(ctx context.Context, in *FetchRecipie
 	return out, nil
 }
 
+func (c *chatServiceClient) Getchats(ctx context.Context, in *GetchatsRequest, opts ...grpc.CallOption) (*GetchatsResponse, error) {
+	out := new(GetchatsResponse)
+	err := c.cc.Invoke(ctx, "/chat.ChatService/Getchats", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatServiceClient) GetMessages(ctx context.Context, in *GetMessagesRequest, opts ...grpc.CallOption) (*GetMessagesReponse, error) {
+	out := new(GetMessagesReponse)
+	err := c.cc.Invoke(ctx, "/chat.ChatService/GetMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatServiceClient) MakeMessageRead(ctx context.Context, in *MakeMessageReadRequest, opts ...grpc.CallOption) (*MakeMessageReadResponse, error) {
+	out := new(MakeMessageReadResponse)
+	err := c.cc.Invoke(ctx, "/chat.ChatService/MakeMessageRead", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChatServiceServer is the server API for ChatService service.
 // All implementations must embed UnimplementedChatServiceServer
 // for forward compatibility
@@ -80,6 +110,9 @@ type ChatServiceServer interface {
 	CreateChatRoom(context.Context, *ChatRoomRequest) (*ChatRoomResponse, error)
 	SaveMessage(context.Context, *SaveMessageRequest) (*SaveMessageResponse, error)
 	FetchRecipient(context.Context, *FetchRecipientRequest) (*FetchRecipientResponse, error)
+	Getchats(context.Context, *GetchatsRequest) (*GetchatsResponse, error)
+	GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesReponse, error)
+	MakeMessageRead(context.Context, *MakeMessageReadRequest) (*MakeMessageReadResponse, error)
 	mustEmbedUnimplementedChatServiceServer()
 }
 
@@ -98,6 +131,15 @@ func (UnimplementedChatServiceServer) SaveMessage(context.Context, *SaveMessageR
 }
 func (UnimplementedChatServiceServer) FetchRecipient(context.Context, *FetchRecipientRequest) (*FetchRecipientResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchRecipient not implemented")
+}
+func (UnimplementedChatServiceServer) Getchats(context.Context, *GetchatsRequest) (*GetchatsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Getchats not implemented")
+}
+func (UnimplementedChatServiceServer) GetMessages(context.Context, *GetMessagesRequest) (*GetMessagesReponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+}
+func (UnimplementedChatServiceServer) MakeMessageRead(context.Context, *MakeMessageReadRequest) (*MakeMessageReadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MakeMessageRead not implemented")
 }
 func (UnimplementedChatServiceServer) mustEmbedUnimplementedChatServiceServer() {}
 
@@ -184,6 +226,60 @@ func _ChatService_FetchRecipient_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChatService_Getchats_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetchatsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).Getchats(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat.ChatService/Getchats",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).Getchats(ctx, req.(*GetchatsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_GetMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).GetMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat.ChatService/GetMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).GetMessages(ctx, req.(*GetMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChatService_MakeMessageRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MakeMessageReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServiceServer).MakeMessageRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chat.ChatService/MakeMessageRead",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServiceServer).MakeMessageRead(ctx, req.(*MakeMessageReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChatService_ServiceDesc is the grpc.ServiceDesc for ChatService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +302,18 @@ var ChatService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FetchRecipient",
 			Handler:    _ChatService_FetchRecipient_Handler,
+		},
+		{
+			MethodName: "Getchats",
+			Handler:    _ChatService_Getchats_Handler,
+		},
+		{
+			MethodName: "GetMessages",
+			Handler:    _ChatService_GetMessages_Handler,
+		},
+		{
+			MethodName: "MakeMessageRead",
+			Handler:    _ChatService_MakeMessageRead_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

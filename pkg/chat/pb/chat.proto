@@ -1,6 +1,8 @@
 syntax = "proto3";
 
 package chat;
+import "google/protobuf/timestamp.proto";
+
 
 option go_package = "github.com/sgokul961/echo-hub-chat-svc/pkg/pb";
 
@@ -9,6 +11,9 @@ service ChatService {
     rpc CreateChatRoom (ChatRoomRequest) returns (ChatRoomResponse) {}
     rpc SaveMessage (SaveMessageRequest) returns (SaveMessageResponse) {}
     rpc FetchRecipient (FetchRecipientRequest) returns (FetchRecipientResponse) {}
+    rpc Getchats (GetchatsRequest) returns (GetchatsResponse) {}
+    rpc GetMessages(GetMessagesRequest) returns (GetMessagesReponse) {}
+    rpc MakeMessageRead(MakeMessageReadRequest) returns (MakeMessageReadResponse) {}
 }
 
 message SendMessageRequest {
@@ -48,5 +53,58 @@ message FetchRecipientRequest{
 message FetchRecipientResponse{
     int64 recipient =1;
     string error =2;
-    
+
+}
+
+message GetchatsRequest {
+  int64 user_id = 1;
+}
+
+message Chat {
+  repeated int64 users = 1;
+  string last_message = 2;
+  string last_message_time = 3;
+}
+
+message UserShortDetail {
+  int64 id = 1;
+  string name = 2;
+  string image = 3;
+}
+
+message GetchatsResponse {
+  repeated ChatResponse chat_responses = 1;
+}
+
+message ChatResponse {
+  Chat chat = 1;
+  UserShortDetail user = 2;
+}
+
+message GetMessagesRequest{
+  string chat_id =1;
+
+}
+
+message Message {
+  string id = 1;
+  int64 sender_id = 2;
+  string chat_id = 3;
+  bool seen = 4;
+  string image = 5;
+  string message_content = 6;
+  string last_message_time = 7;
+}
+
+message GetMessagesReponse {
+  repeated Message messages = 1;
+}
+message MakeMessageReadRequest{
+  int64 user_id =1;
+  string chat_id =2;
+
+}
+message MakeMessageReadResponse{
+  int64 res =1;
+  string error=2;
 }

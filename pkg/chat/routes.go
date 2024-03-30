@@ -18,9 +18,18 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 
 	chatRoutes := r.Group("/chat")
 	chatRoutes.GET("/ws", userAuthMiddleware, svc.Chat)
+	chatRoutes.GET("", userAuthMiddleware, svc.Getchats)
+	chatRoutes.GET("/:chatId/message", userAuthMiddleware, svc.GetMessages)
 
 }
 func (svc *ServiceClient) Chat(ctx *gin.Context) {
+
 	routsC.Chat(ctx, svc.Client)
 
+}
+func (svc *ServiceClient) Getchats(ctx *gin.Context) {
+	routsC.Getchats(ctx, svc.Client)
+}
+func (svc *ServiceClient) GetMessages(ctx *gin.Context) {
+	routsC.GetMessages(ctx, svc.Client)
 }
