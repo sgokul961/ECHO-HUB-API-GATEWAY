@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	_ "github.com/sgokul961/echo-hub-api-gateway/cmd/docs"
+	_ "github.com/sgokul961/echo-hub-api-gateway/cmd/api_gateway/docs"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/config"
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/server"
 )

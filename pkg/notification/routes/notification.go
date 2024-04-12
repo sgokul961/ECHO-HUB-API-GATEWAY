@@ -130,5 +130,54 @@ func ConsumeKafkaMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
 // 	})
 
 // Close the stream
-// 	stream.CloseSend()
-// }
+//
+//		stream.CloseSend()
+//	}
+func ConsumeKafkaCommentMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
+	var getUserId pb.ConsumeKafkaCommentMessagesRequest
+
+	userID, ok := ctx.Get("userId")
+
+	fmt.Println("user id ", userID)
+	if !ok || userID == nil {
+		errRes := models.MakeResponse(http.StatusUnauthorized, "user id is not valid", nil, errors.New("user id is nil"))
+		ctx.JSON(http.StatusUnauthorized, errRes)
+		return
+	}
+	getUserId.UserId = userID.(int64)
+
+	res, err := p.ConsumeKafkaCommentMessages(ctx, &getUserId)
+
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting notification service", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "New Comment Message", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}
+func ConsumeKafkaLikeMessages(ctx *gin.Context, p pb.NotificationServiceClient) {
+
+	var getUserId pb.ConsumeKafkaLikeMessagesRequest
+
+	userID, ok := ctx.Get("userId")
+
+	fmt.Println("user id ", userID)
+	if !ok || userID == nil {
+		errRes := models.MakeResponse(http.StatusUnauthorized, "user id is not valid", nil, errors.New("user id is nil"))
+		ctx.JSON(http.StatusUnauthorized, errRes)
+		return
+	}
+	getUserId.UserId = userID.(int64)
+
+	res, err := p.ConsumeKafkaLikeMessages(ctx, &getUserId)
+	if err != nil {
+		errRes := models.MakeResponse(http.StatusBadGateway, "error connecting notification service", nil, err.Error())
+		ctx.JSON(http.StatusBadGateway, errRes)
+		return
+	}
+	successRes := models.MakeResponse(http.StatusOK, "New like Added", res, nil)
+	ctx.JSON(http.StatusOK, successRes)
+
+}

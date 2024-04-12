@@ -21,6 +21,8 @@ func RegisterRoutes(r *gin.Engine, c config.Config, authSvc *auth.ServiceClient)
 
 	notifyRouts.POST("/likeNotification/:postId", userAuthMiddleware, svc.SendLikeNotification)
 	notifyRouts.GET("/consume/like", svc.ConsumeKafkaMessages)
+	notifyRouts.GET("/consumecomment", userAuthMiddleware, svc.ConsumeKafkaCommentMessages)
+	notifyRouts.GET("/consumeLike", userAuthMiddleware, svc.ConsumeKafkaLikeMessages)
 
 }
 
@@ -36,5 +38,11 @@ func (svc *ServiceClient) SendLikeNotification(ctx *gin.Context) {
 }
 func (svc *ServiceClient) ConsumeKafkaMessages(ctx *gin.Context) {
 	notification_routes.ConsumeKafkaMessages(ctx, svc.Client)
+}
 
+func (svc *ServiceClient) ConsumeKafkaCommentMessages(ctx *gin.Context) {
+	notification_routes.ConsumeKafkaCommentMessages(ctx, svc.Client)
+}
+func (svc *ServiceClient) ConsumeKafkaLikeMessages(ctx *gin.Context) {
+	notification_routes.ConsumeKafkaLikeMessages(ctx, svc.Client)
 }

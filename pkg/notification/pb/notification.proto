@@ -7,7 +7,7 @@ option go_package = "github.com/sgokul961/echo-hub-notification-svc/pkg/pb";
 // Message for when a user comments on a post
 message CommentedNotification {
   string postId = 1;
-  string commenterId = 2; 
+  string commenterId = 2;
   string comment = 3;
 }
 
@@ -25,19 +25,15 @@ message KafkaNotification {
 
 // Service definition for the notification microservice
 service NotificationService {
-  // Method to send a notification when a user comments on a post
   rpc SendCommentedNotification (CommentedNotification) returns (NotificationResponse) {}
-
-  // Method to send a notification when a user follows another user
   rpc SendFollowedNotification (FollowedNotification) returns (NotificationResponse) {}
-
-  // Method to send a notification message to Kafka topic
   rpc SendKafkaNotification (KafkaNotification) returns (NotificationResponse) {}
 
-
   rpc SendLikeNotification (LikeNotification) returns (NotificationResponse) {}
-
   rpc ConsumeKafkaMessages(Empty) returns (stream NotificationMessage);
+  rpc ConsumeKafkaCommentMessages(ConsumeKafkaCommentMessagesRequest) returns ( ConsumeKafkaCommentMessagesResponse){}
+  rpc ConsumeKafkaLikeMessages(ConsumeKafkaLikeMessagesRequest) returns (ConsumeKafkaLikeMessagesResponse) {}
+
 
 }
 
@@ -62,3 +58,29 @@ message NotificationMessage {
   string message = 3;
 }
 message Empty {}
+
+message ConsumeKafkaCommentMessagesRequest{
+  int64 user_id =1;
+
+}
+message ConsumeKafkaCommentMessagesResponse{
+  int64 user_id =1;
+  int64 post_id =2;
+  string message =3;
+  string content =4;
+
+
+}
+
+message ConsumeKafkaLikeMessagesRequest{
+  int64 user_id =1;
+
+}
+
+message ConsumeKafkaLikeMessagesResponse{
+  int64 user_id =1;
+  int64 post_id =2;
+  string message =3;
+  string content =4;
+
+}

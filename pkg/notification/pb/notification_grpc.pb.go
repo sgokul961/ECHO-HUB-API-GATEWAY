@@ -22,14 +22,13 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NotificationServiceClient interface {
-	// Method to send a notification when a user comments on a post
 	SendCommentedNotification(ctx context.Context, in *CommentedNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
-	// Method to send a notification when a user follows another user
 	SendFollowedNotification(ctx context.Context, in *FollowedNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
-	// Method to send a notification message to Kafka topic
 	SendKafkaNotification(ctx context.Context, in *KafkaNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
 	SendLikeNotification(ctx context.Context, in *LikeNotification, opts ...grpc.CallOption) (*NotificationResponse, error)
 	ConsumeKafkaMessages(ctx context.Context, in *Empty, opts ...grpc.CallOption) (NotificationService_ConsumeKafkaMessagesClient, error)
+	ConsumeKafkaCommentMessages(ctx context.Context, in *ConsumeKafkaCommentMessagesRequest, opts ...grpc.CallOption) (*ConsumeKafkaCommentMessagesResponse, error)
+	ConsumeKafkaLikeMessages(ctx context.Context, in *ConsumeKafkaLikeMessagesRequest, opts ...grpc.CallOption) (*ConsumeKafkaLikeMessagesResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -108,18 +107,35 @@ func (x *notificationServiceConsumeKafkaMessagesClient) Recv() (*NotificationMes
 	return m, nil
 }
 
+func (c *notificationServiceClient) ConsumeKafkaCommentMessages(ctx context.Context, in *ConsumeKafkaCommentMessagesRequest, opts ...grpc.CallOption) (*ConsumeKafkaCommentMessagesResponse, error) {
+	out := new(ConsumeKafkaCommentMessagesResponse)
+	err := c.cc.Invoke(ctx, "/notification.NotificationService/ConsumeKafkaCommentMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) ConsumeKafkaLikeMessages(ctx context.Context, in *ConsumeKafkaLikeMessagesRequest, opts ...grpc.CallOption) (*ConsumeKafkaLikeMessagesResponse, error) {
+	out := new(ConsumeKafkaLikeMessagesResponse)
+	err := c.cc.Invoke(ctx, "/notification.NotificationService/ConsumeKafkaLikeMessages", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility
 type NotificationServiceServer interface {
-	// Method to send a notification when a user comments on a post
 	SendCommentedNotification(context.Context, *CommentedNotification) (*NotificationResponse, error)
-	// Method to send a notification when a user follows another user
 	SendFollowedNotification(context.Context, *FollowedNotification) (*NotificationResponse, error)
-	// Method to send a notification message to Kafka topic
 	SendKafkaNotification(context.Context, *KafkaNotification) (*NotificationResponse, error)
 	SendLikeNotification(context.Context, *LikeNotification) (*NotificationResponse, error)
 	ConsumeKafkaMessages(*Empty, NotificationService_ConsumeKafkaMessagesServer) error
+	ConsumeKafkaCommentMessages(context.Context, *ConsumeKafkaCommentMessagesRequest) (*ConsumeKafkaCommentMessagesResponse, error)
+	ConsumeKafkaLikeMessages(context.Context, *ConsumeKafkaLikeMessagesRequest) (*ConsumeKafkaLikeMessagesResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -141,6 +157,12 @@ func (UnimplementedNotificationServiceServer) SendLikeNotification(context.Conte
 }
 func (UnimplementedNotificationServiceServer) ConsumeKafkaMessages(*Empty, NotificationService_ConsumeKafkaMessagesServer) error {
 	return status.Errorf(codes.Unimplemented, "method ConsumeKafkaMessages not implemented")
+}
+func (UnimplementedNotificationServiceServer) ConsumeKafkaCommentMessages(context.Context, *ConsumeKafkaCommentMessagesRequest) (*ConsumeKafkaCommentMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConsumeKafkaCommentMessages not implemented")
+}
+func (UnimplementedNotificationServiceServer) ConsumeKafkaLikeMessages(context.Context, *ConsumeKafkaLikeMessagesRequest) (*ConsumeKafkaLikeMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConsumeKafkaLikeMessages not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 
@@ -248,6 +270,42 @@ func (x *notificationServiceConsumeKafkaMessagesServer) Send(m *NotificationMess
 	return x.ServerStream.SendMsg(m)
 }
 
+func _NotificationService_ConsumeKafkaCommentMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConsumeKafkaCommentMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).ConsumeKafkaCommentMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/notification.NotificationService/ConsumeKafkaCommentMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).ConsumeKafkaCommentMessages(ctx, req.(*ConsumeKafkaCommentMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_ConsumeKafkaLikeMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConsumeKafkaLikeMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).ConsumeKafkaLikeMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/notification.NotificationService/ConsumeKafkaLikeMessages",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).ConsumeKafkaLikeMessages(ctx, req.(*ConsumeKafkaLikeMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -270,6 +328,14 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendLikeNotification",
 			Handler:    _NotificationService_SendLikeNotification_Handler,
+		},
+		{
+			MethodName: "ConsumeKafkaCommentMessages",
+			Handler:    _NotificationService_ConsumeKafkaCommentMessages_Handler,
+		},
+		{
+			MethodName: "ConsumeKafkaLikeMessages",
+			Handler:    _NotificationService_ConsumeKafkaLikeMessages_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

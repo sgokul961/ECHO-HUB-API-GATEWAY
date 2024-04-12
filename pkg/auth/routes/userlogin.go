@@ -10,6 +10,15 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/models"
 )
 
+// Login logs in a user
+// @Summary Logs in a user
+// @Description Logs in a user
+// @Accept json
+// @Produce json
+// @Param loginRequest body pb.LoginRequest true "Login Request"
+// @Success 200 {object} pb.LoginResponse
+// @Failure 502 {object} models.ErrorResponse
+// @Router /auth/login [post]
 func Login(ctx *gin.Context, p pb.AuthServiceClient) {
 
 	var userLogin pb.LoginRequest
