@@ -1,4 +1,28 @@
 basePath: /api/v1
+definitions:
+  models.Response:
+    properties:
+      data: {}
+      error: {}
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  pb.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  pb.LoginResponse:
+    properties:
+      AccessToken:
+        type: string
+      RefreshToken:
+        type: string
+    type: object
 externalDocs:
   description: OpenAPI
   url: https://swagger.io/resources/open-api/
@@ -15,7 +39,88 @@ info:
   termsOfService: http://swagger.io/terms/
   title: ECHO-HUB-SOCIAL-MEADIA
   version: "1.0"
-paths: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Logs in a user
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/pb.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/pb.LoginResponse'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Logs in a user
+  /auth/register:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Register a new user with the provided information
+      parameters:
+      - description: User's email address
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: User's password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: User's phone number
+        in: formData
+        name: phonenum
+        required: true
+        type: string
+      - description: User's username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: User's bio
+        in: formData
+        name: bio
+        type: string
+      - description: User's gender
+        in: formData
+        name: gender
+        type: string
+      - description: User's profile picture
+        in: formData
+        name: profile_picture
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Register a new user
+      tags:
+      - Authentication
 securityDefinitions:
   BasicAuth:
     type: basic

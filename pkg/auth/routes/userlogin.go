@@ -17,7 +17,7 @@ import (
 // @Produce json
 // @Param loginRequest body pb.LoginRequest true "Login Request"
 // @Success 200 {object} pb.LoginResponse
-// @Failure 502 {object} models.ErrorResponse
+// @Failure 502 {object} models.Response
 // @Router /auth/login [post]
 func Login(ctx *gin.Context, p pb.AuthServiceClient) {
 
