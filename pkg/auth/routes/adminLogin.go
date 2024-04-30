@@ -8,6 +8,15 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/models"
 )
 
+// AdminLogin godoc
+// @Summary Admin login
+// @Description Authenticate admin user
+// @Accept json
+// @Produce json
+// @Param request body pb.AdminLoginRequest true "Admin login request body"
+// @Success 200 {object} string "Admin successfully logged in"
+// @Failure 502 {object} string "Error parsing request body or connecting to authentication service"
+// @Router /admin/adminlogin [post]
 func AdminLogin(ctx *gin.Context, p pb.AuthServiceClient) {
 	var AdminLogin pb.AdminLoginRequest
 	err := ctx.BindJSON(&AdminLogin)
@@ -30,6 +39,16 @@ func AdminLogin(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
+// BlockUser godoc
+// @Summary Block user
+// @Description Block a user account
+// @Accept json
+// @Produce json
+// @Param request body pb.BlockUserRequest true "Block user request body"
+// @Success 200 string SuccessResponse "Admin successfully blocked user"
+// @Failure 502 string ErrorResponse "Error parsing request body or connecting to authentication service"
+// @Router /admin/block [post]
 func BlockUser(ctx *gin.Context, p pb.AuthServiceClient) {
 	var blockUser pb.BlockUserRequest
 
@@ -49,6 +68,16 @@ func BlockUser(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
+// UnblockUser godoc
+// @Summary Unblock user
+// @Description Unblock a user account
+// @Accept json
+// @Produce json
+// @Param request body pb.UnblockUserRequest true "Unblock user request body"
+// @Success 200 string SuccessResponse "Admin successfully unblocked user"
+// @Failure 502 string ErrorResponse "Error parsing request body or connecting to authentication service"
+// @Router /admin/unblock [post]
 func UnblockUser(ctx *gin.Context, p pb.AuthServiceClient) {
 
 	var unBlockUser pb.UnblockUserRequest

@@ -10,6 +10,22 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/models"
 )
 
+// AdminSignup godoc
+// @Summary Admin signup
+// @Description Register a new admin account
+// @Accept multipart/form-data
+// @Produce json
+// @Param email formData string true "Admin email"
+// @Param password formData string true "Admin password"
+// @Param username formData string true "Admin username"
+// @Param phonenum formData string true "Admin phone number"
+// @Param bio formData string false "Admin bio"
+// @Param gender formData string false "Admin gender"
+// @Param profile_picture formData file true "Admin profile picture"
+// @Success 200 string SuccessResponse "Successfully registered admin data"
+// @Failure 400 string ErrorResponse "Bad request, error parsing form or missing required fields"
+// @Failure 502 string ErrorResponse "Error connecting to authentication service"
+// @Router /admin/adminsignup [post]
 func AdminSignup(ctx *gin.Context, p pb.AuthServiceClient) {
 
 	err := ctx.Request.ParseMultipartForm(10 << 20)

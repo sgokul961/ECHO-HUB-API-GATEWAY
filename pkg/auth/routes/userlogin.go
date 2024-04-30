@@ -10,14 +10,15 @@ import (
 	"github.com/sgokul961/echo-hub-api-gateway/pkg/models"
 )
 
-// Login logs in a user
-// @Summary Logs in a user
-// @Description Logs in a user
+// Login logs in a user.
+// @Summary Logs in a user.
+// @Description Logs in a user by accepting a JSON login request and returning a response.
 // @Accept json
 // @Produce json
 // @Param loginRequest body pb.LoginRequest true "Login Request"
-// @Success 200 {object} pb.LoginResponse
-// @Failure 502 {object} models.Response
+// @Success 200 {object} string "User successfully logged in"
+// @Failure 400 {object} string "Bad Request: Invalid login request"
+// @Failure 502 {object} string "Bad Gateway: Error connecting to auth service"
 // @Router /auth/login [post]
 func Login(ctx *gin.Context, p pb.AuthServiceClient) {
 
@@ -42,6 +43,21 @@ func Login(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
+// ResetPassword godoc
+// @Summary Reset password
+// @Description Reset password for a user
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param Authorization header string true "Bearer <token>"
+// @Param userId header int true "User ID"
+// @Param request body pb.ResetPasswordRequest true "Reset password request body"
+// @Success 200 {object} models.Response "New password successfully updated"
+// @Failure 400 {object} models.Response "Bad request, error parsing request body or missing required fields"
+// @Failure 401 {object} models.Response "Unauthorized, error parsing user ID"
+// @Failure 502 {object} models.Response "Error connecting to authentication service"
+// @Router /auth/resetPassword [patch]
 func ResetPassword(ctx *gin.Context, p pb.AuthServiceClient) {
 	var Reset pb.ResetPasswordRequest
 	id, ok := ctx.Get("userId")
@@ -72,6 +88,7 @@ func ResetPassword(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
 func ForgotPassWord(ctx *gin.Context, p pb.AuthServiceClient) {
 	var forgot pb.ForgotPasswordRequest
 
@@ -92,6 +109,17 @@ func ForgotPassWord(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
+// CheckUserBlocked godoc
+// @Summary Check if user is blocked
+// @Description Check the block status of a user
+// @Accept json
+// @Produce json
+// @Param request body pb.CheckUserBlockedRequest true "Check user blocked request body"
+// @Success 200 {object} models.Response "User block status checked successfully"
+// @Failure 400 {object} models.Response "Bad request, error parsing request body or missing required fields"
+// @Failure 502 {object} models.Response "Error connecting to authentication service"
+// @Router /admin/checkBlock [post]
 func CheckUserBlocked(ctx *gin.Context, p pb.AuthServiceClient) {
 	var checkblock pb.CheckUserBlockedRequest
 
@@ -118,6 +146,17 @@ func CheckUserBlocked(ctx *gin.Context, p pb.AuthServiceClient) {
 	ctx.JSON(http.StatusOK, successRes)
 
 }
+
+// FetchShortDetails godoc
+// @Summary Fetch short details
+// @Description Fetch short details of a user
+// @Accept json
+// @Produce json
+// @Param request body pb.FetchShortDetailsRequest true "Fetch short details request body"
+// @Success 200 {object} models.Response "Successfully fetched short details"
+// @Failure 400 {object} models.Response "Bad request, error parsing request body or missing required fields"
+// @Failure 502 {object} models.Response "Error connecting to authentication service"
+// @Router /auth/fetchUser [get]
 func FetchShortDetails(ctx *gin.Context, p pb.AuthServiceClient) {
 
 	var fetch pb.FetchShortDetailsRequest
