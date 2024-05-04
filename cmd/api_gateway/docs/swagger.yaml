@@ -9,6 +9,28 @@ definitions:
       status:
         type: integer
     type: object
+  pb.AdminLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  pb.BlockUserRequest:
+    properties:
+      Id:
+        type: integer
+    type: object
+  pb.CheckUserBlockedRequest:
+    properties:
+      id:
+        type: integer
+    type: object
+  pb.FetchShortDetailsRequest:
+    properties:
+      id:
+        type: integer
+    type: object
   pb.LoginRequest:
     properties:
       email:
@@ -16,12 +38,19 @@ definitions:
       password:
         type: string
     type: object
-  pb.LoginResponse:
+  pb.ResetPasswordRequest:
     properties:
-      AccessToken:
+      email:
         type: string
-      RefreshToken:
+      id:
+        type: integer
+      password:
         type: string
+    type: object
+  pb.UnblockUserRequest:
+    properties:
+      Id:
+        type: integer
     type: object
 externalDocs:
   description: OpenAPI
@@ -40,11 +69,200 @@ info:
   title: ECHO-HUB-SOCIAL-MEADIA
   version: "1.0"
 paths:
+  /admin/adminlogin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate admin user
+      parameters:
+      - description: Admin login request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pb.AdminLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin successfully logged in
+          schema:
+            type: string
+        "502":
+          description: Error parsing request body or connecting to authentication
+            service
+          schema:
+            type: string
+      summary: Admin login
+  /admin/adminsignup:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Register a new admin account
+      parameters:
+      - description: Admin email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Admin password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Admin username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Admin phone number
+        in: formData
+        name: phonenum
+        required: true
+        type: string
+      - description: Admin bio
+        in: formData
+        name: bio
+        type: string
+      - description: Admin gender
+        in: formData
+        name: gender
+        type: string
+      - description: Admin profile picture
+        in: formData
+        name: profile_picture
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully registered admin data
+          schema:
+            type: string
+        "400":
+          description: Bad request, error parsing form or missing required fields
+          schema:
+            type: string
+        "502":
+          description: Error connecting to authentication service
+          schema:
+            type: string
+      summary: Admin signup
+  /admin/block:
+    post:
+      consumes:
+      - application/json
+      description: Block a user account
+      parameters:
+      - description: Block user request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pb.BlockUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin successfully blocked user
+          schema:
+            type: string
+        "502":
+          description: Error parsing request body or connecting to authentication
+            service
+          schema:
+            type: string
+      summary: Block user
+  /admin/checkBlock:
+    post:
+      consumes:
+      - application/json
+      description: Check the block status of a user
+      parameters:
+      - description: Check user blocked request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pb.CheckUserBlockedRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User block status checked successfully
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request, error parsing request body or missing required
+            fields
+          schema:
+            $ref: '#/definitions/models.Response'
+        "502":
+          description: Error connecting to authentication service
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Check if user is blocked
+  /admin/unblock:
+    post:
+      consumes:
+      - application/json
+      description: Unblock a user account
+      parameters:
+      - description: Unblock user request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pb.UnblockUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Admin successfully unblocked user
+          schema:
+            type: string
+        "502":
+          description: Error parsing request body or connecting to authentication
+            service
+          schema:
+            type: string
+      summary: Unblock user
+  /auth/fetchUser:
+    get:
+      consumes:
+      - application/json
+      description: Fetch short details of a user
+      parameters:
+      - description: Fetch short details request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pb.FetchShortDetailsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully fetched short details
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request, error parsing request body or missing required
+            fields
+          schema:
+            $ref: '#/definitions/models.Response'
+        "502":
+          description: Error connecting to authentication service
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Fetch short details
   /auth/login:
     post:
       consumes:
       - application/json
-      description: Logs in a user
+      description: Logs in a user by accepting a JSON login request and returning
+        a response.
       parameters:
       - description: Login Request
         in: body
@@ -56,14 +274,18 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: User successfully logged in
           schema:
-            $ref: '#/definitions/pb.LoginResponse'
+            type: string
+        "400":
+          description: 'Bad Request: Invalid login request'
+          schema:
+            type: string
         "502":
-          description: Bad Gateway
+          description: 'Bad Gateway: Error connecting to auth service'
           schema:
-            $ref: '#/definitions/models.Response'
-      summary: Logs in a user
+            type: string
+      summary: Logs in a user.
   /auth/register:
     post:
       consumes:
@@ -121,6 +343,51 @@ paths:
       summary: Register a new user
       tags:
       - Authentication
+  /auth/resetPassword:
+    patch:
+      consumes:
+      - application/json
+      description: Reset password for a user
+      parameters:
+      - description: Bearer <token>
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: User ID
+        in: header
+        name: userId
+        required: true
+        type: integer
+      - description: Reset password request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/pb.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: New password successfully updated
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad request, error parsing request body or missing required
+            fields
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized, error parsing user ID
+          schema:
+            $ref: '#/definitions/models.Response'
+        "502":
+          description: Error connecting to authentication service
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Reset password
 securityDefinitions:
   BasicAuth:
     type: basic
